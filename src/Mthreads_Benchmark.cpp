@@ -51,7 +51,7 @@ int main () {
 	int num_threads = 1;
 	int scen_No = 0;
 	//void *status;
-	struct return_value *resp;
+	struct return_value *resp = new struct return_value;
 	int n_core = sysconf(_SC_NPROCESSORS_ONLN);
 
 	cout << "4 scenario has been defined." << endl;
@@ -73,6 +73,12 @@ int main () {
 	switch(scen_No){
 	case 1:
 		num_threads = 5;
+		break;
+	case 2:
+		num_threads = 3;
+		break;
+	default:
+		num_threads = 3;
 		break;
 	}
 	pthread_attr_t tattr;
@@ -124,7 +130,7 @@ int main () {
 
 		}catch (const char* msg) {
 		     cerr << msg << endl;
-		   }
+		};
 		//if (rc != 0) {	cout << "pthread_setaffinity_np ERROR"; };
 		/*
 		for( i = 0; i < num_cores; i++ ) {
@@ -152,26 +158,50 @@ int main () {
 
 		   }
 		free(resp);
+		sleep(1);
+		cout << "THE ENGINE STARTED..." << endl;
 		break;
 	case 2:
+		cout << endl << "-----------main()-----------"<< endl << "Scenario(2): 3 thread for 3 function has been created." << endl;
 		thr_data.message="Opening the windows.";
-		for( i = 0; i < num_cores; i++ ) {
-			  cout << endl << "main() : creating thread, " << i << endl;
-			  rc = pthread_setschedprio(threads[i],i+1);
-			  param.sched_priority = i+1;
-			  rc = pthread_setschedparam(threads[i], policy, &param);
-			  cout << "param.sched_priority for Thread " << i << ": " << param.sched_priority << endl;
-			  rc = pthread_create(&threads[i], &tattr, CtrWindows, (void *)&thr_data);
+		try {
+			CPU_SET(1, &cpuset);
+			//rc = pthread_setaffinity_np(threads[1], sizeof(cpuset), &cpuset);
+			param.sched_priority = 1;
+			rc = pthread_attr_setschedparam (&tattr, &param);
+			rc = pthread_attr_setaffinity_np(&tattr, sizeof(cpuset), &cpuset);
+			rc = pthread_create(&threads[0], &tattr, CtrWindows, (void *)&thr_data);
+			//rc = pthread_create(&threads[1], &tattr, CheckBattery, (void *)&thr_data);
+			 rc = pthread_join(threads[0], (void**)&resp);
+			 cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
 
+			if (rc) {
+			 cout << "Error:unable to create thread for CtrWindows" << rc << endl;
+			 exit(-1);
+			}
+
+
+		}catch(const char* msg) {
+		     cerr << msg << endl;
+		};
+
+		pthread_attr_destroy(&tattr);
+		/*for( i = 0; i < 5; i++ ) {
+			  rc = pthread_join(threads[i], (void**)&resp);
 			  if (rc) {
-				 cout << "Error:unable to create thread for CtrWindows" << rc << endl;
+				 cout << "Error:unable to join," << rc << endl;
 				 exit(-1);
 			  }
-		   }
+			  cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
+
+		   }*/
+
+		sleep(1);
+		cout << "THE powerwindow DONE..." << endl;
 		break;
 	default:
 		thr_data.message="PrintHello.";
-		for( i = 0; i < num_cores; i++ ) {
+		for( i = 0; i < num_threads; i++ ) {
 			rc = pthread_create(&threads[i], &tattr, PrintHello, (void *)&thr_data);
 		}
 	};
