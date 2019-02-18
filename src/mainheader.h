@@ -37,6 +37,8 @@ struct return_value {
 extern struct thread_data thr_data;
 extern pthread_mutex_t lock;
 extern pthread_cond_t con;
+extern pthread_mutex_t condition_mutex;
+extern pthread_condattr_t cattr;
 extern cpu_set_t cpuset;
 
 #endif /* MAINHEADER_H_ */

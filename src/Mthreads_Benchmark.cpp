@@ -26,7 +26,9 @@ bool done = 0;
 
 sched_param param;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t condition_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t con = PTHREAD_COND_INITIALIZER;
+pthread_condattr_t cattr;
 struct thread_data thr_data;
 cpu_set_t cpuset;
 
@@ -165,15 +167,16 @@ int main () {
 		cout << endl << "-----------main()-----------"<< endl << "Scenario(2): 3 thread for 3 function has been created." << endl;
 		thr_data.message="Opening the windows.";
 		try {
-			CPU_SET(1, &cpuset);
+			CPU_SET(2, &cpuset);
 			//rc = pthread_setaffinity_np(threads[1], sizeof(cpuset), &cpuset);
 			param.sched_priority = 1;
 			rc = pthread_attr_setschedparam (&tattr, &param);
 			rc = pthread_attr_setaffinity_np(&tattr, sizeof(cpuset), &cpuset);
 			rc = pthread_create(&threads[0], &tattr, CtrWindows, (void *)&thr_data);
 			//rc = pthread_create(&threads[1], &tattr, CheckBattery, (void *)&thr_data);
-			 rc = pthread_join(threads[0], (void**)&resp);
-			 cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
+			pthread_attr_destroy(&tattr);
+			rc = pthread_join(threads[0], (void**)&resp);
+			cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
 
 			if (rc) {
 			 cout << "Error:unable to create thread for CtrWindows" << rc << endl;
@@ -184,17 +187,6 @@ int main () {
 		}catch(const char* msg) {
 		     cerr << msg << endl;
 		};
-
-		pthread_attr_destroy(&tattr);
-		/*for( i = 0; i < 5; i++ ) {
-			  rc = pthread_join(threads[i], (void**)&resp);
-			  if (rc) {
-				 cout << "Error:unable to join," << rc << endl;
-				 exit(-1);
-			  }
-			  cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
-
-		   }*/
 
 		sleep(1);
 		cout << "THE powerwindow DONE..." << endl;
