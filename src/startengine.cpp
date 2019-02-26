@@ -42,6 +42,7 @@ void *StartEngine(void *data){
 void *CheckBattery(void *data){
 	//int battery_level = 0;
 	struct return_value *eg = new struct return_value;
+	eg->core_No = CPU_COUNT(&cpuset);
 	strcpy(eg->fun_name,"CheckBattery");
 	struct thread_data *my_data = (struct thread_data *) data;
 	int a = 0;
@@ -82,6 +83,7 @@ void *CheckSeatBelt(void *data){
 	pthread_t tid = pthread_self();
 	my_data->thread_id = tid;
 	eg->thr_id = tid;
+	eg->core_No = CPU_COUNT(&cpuset);
 	my_data->message = "Checking the SeatBelt";
 	//cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) << endl;
 	eg->val = RandBool();
@@ -98,6 +100,7 @@ void *FuelControll(void *data){
 	pthread_t tid = pthread_self();
 	struct thread_data *my_data = (struct thread_data *) data;
 	struct return_value *eg = new struct return_value;
+	eg->core_No = CPU_COUNT(&cpuset);
 	strcpy(eg->fun_name,"FuelControll");
 	my_data->thread_id = tid;
 	eg->thr_id = tid;

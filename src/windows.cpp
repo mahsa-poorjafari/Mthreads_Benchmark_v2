@@ -10,18 +10,19 @@
 extern int rc;
 //Open all the Windows
 void *OpenAll(void *arg){
-
+	int res;
 	int i;
 	int policy = 0;
 	struct return_value *resp;
 	struct thread_data *my_data = (struct thread_data *) arg;
 	struct return_value *eg = new struct return_value;
+	eg->core_No = CPU_COUNT(&cpuset);
 	pthread_attr_t oattr;
 	pthread_t opwin[4];
-	rc = pthread_attr_init(&oattr);
+	res = pthread_attr_init(&oattr);
 	pthread_attr_getschedpolicy(&oattr, &policy);
 	param.sched_priority = 2;
-	rc = pthread_attr_setschedparam (&oattr, &param);
+	res = pthread_attr_setschedparam (&oattr, &param);
 
 	/*if (my_data->core_no>1){
 		CPU_SET(2, &cpuset);
@@ -38,16 +39,16 @@ void *OpenAll(void *arg){
 	my_data->signal_name = "lock_all_doors";
 	eg->val = 13;
 	cout << " 4 thread will create for 4 windows. Thread ID " << eg->thr_id << endl;
-	rc = pthread_create(&opwin[0], &oattr, powerwindow_DRV, (void *)&my_data);
-	rc = pthread_create(&opwin[1], &oattr, powerwindow_PSG_BackL, (void *)&my_data);
-	rc = pthread_create(&opwin[2], &oattr, powerwindow_PSG_BackR, (void *)&my_data);
-	rc = pthread_create(&opwin[3], &oattr, powerwindow_PSG_Front, (void *)&my_data);
+	res = pthread_create(&opwin[0], &oattr, powerwindow_DRV, (void *)&my_data);
+	res = pthread_create(&opwin[1], &oattr, powerwindow_PSG_BackL, (void *)&my_data);
+	res = pthread_create(&opwin[2], &oattr, powerwindow_PSG_BackR, (void *)&my_data);
+	res = pthread_create(&opwin[3], &oattr, powerwindow_PSG_Front, (void *)&my_data);
 
 	for( i = 0; i < 4; i++ ) {
-	    rc = pthread_join(opwin[i], (void**)&resp);
+		res = pthread_join(opwin[i], (void**)&resp);
 	    cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) <<  "  " << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
-	    if (rc) {
-		   cout << "Error:unable to join," << rc << endl;
+	    if (res) {
+		   cout << "Error:unable to join," << res << endl;
 		   exit(-1);
 	    }
 	};
@@ -89,8 +90,9 @@ void *CheckDoors(void *arg){
 
 //This is the parent thread. door windows will be closed, if the doors are open either the car is turn off.
 void *CtrWindows(void *data){
-	rc = pthread_condattr_destroy(&cattr);
-	rc = pthread_cond_init(&con, &cattr);
+	int res;
+	res = pthread_condattr_destroy(&cattr);
+	res = pthread_cond_init(&con, &cattr);
 	struct return_value *resp;
 	pthread_attr_t tattr;
 	pthread_t ctrdoors;
@@ -99,9 +101,9 @@ void *CtrWindows(void *data){
 	cout << "thr_data.core_no= " << win_data->core_no << endl;
 	//CPU_SET(2, &cpuset);
 	//win_data->core_no--;
-	rc = pthread_attr_init(&tattr);
+	res = pthread_attr_init(&tattr);
 	param.sched_priority = 1;
-	rc = pthread_attr_setschedparam (&tattr, &param);
+	res = pthread_attr_setschedparam (&tattr, &param);
 	//rc = pthread_attr_setaffinity_np(&tattr, sizeof(cpuset), &cpuset);
 	int n=0;
 	//int z;
@@ -122,34 +124,34 @@ void *CtrWindows(void *data){
 	switch(n){
 	case 1:
 		cout << "driver side powerwindow" << endl;
-		rc = pthread_create(&ctrdoors, &tattr, powerwindow_DRV, (void *)&win_data);
+		res = pthread_create(&ctrdoors, &tattr, powerwindow_DRV, (void *)&win_data);
 
 		break;
 	case 2:
 		cout << "front passenger side powerwindow" << endl;
-		rc = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_Front, (void *)&win_data);
+		res = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_Front, (void *)&win_data);
 
 		break;
 	case 3:
 		cout << "back-left passenger side powerwindow" << endl;
-		rc = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_BackL, (void *)&win_data);
+		res = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_BackL, (void *)&win_data);
 
 		break;
 	case 4:
 		cout << "back-right passenger side powerwindow" << endl;
-		rc = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_BackR, (void *)&win_data);
+		res = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_BackR, (void *)&win_data);
 
 		break;
 	case 5:
 	default:
 		cout << "Open All the Windows" << endl;
-		rc = pthread_create(&ctrdoors, &tattr, OpenAll, (void *)&win_data);
+		res = pthread_create(&ctrdoors, &tattr, OpenAll, (void *)&win_data);
 
 		break;
 	};
-	rc=pthread_join(ctrdoors, (void **) &resp);
-    if (rc) {
-	   cout << "Error:unable to join," << rc << endl;
+	res=pthread_join(ctrdoors, (void **) &resp);
+    if (res) {
+	   cout << "Error:unable to join," << res << endl;
 	   exit(-1);
     }
 	eg->val =  resp->val;

@@ -23,6 +23,7 @@ void *AirConditioner(void *data){
 	pthread_t tid = pthread_self();
 	my_data->thread_id = tid;
 	air->thr_id=tid;
+	air->core_No = CPU_COUNT(&cpuset);
 	pthread_t winthr;
 	rc = pthread_create(&winthr, NULL, SenThermal, (void *)&thr_data);
 	rc = pthread_join(winthr, (void**)&resp);

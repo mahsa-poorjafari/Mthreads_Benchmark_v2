@@ -53,14 +53,14 @@ int main () {
 	int n_core = sysconf(_SC_NPROCESSORS_ONLN);
 	tp.tv_nsec = 400;
 
-	cout << "4 scenario has been defined." << endl;
+	cout << "3 scenario has been defined." << endl;
 	cout << "(1) Turn On the engine"<< endl;
 	cout << "(2) Opening the windows."<< endl;
 	cout << "(3) Park the car"<< endl;
-	cout << "(4) Driving in the highway"<< endl;
-	cout << "Please choose one of the 4 scenarios:"<< endl;
+
+	cout << "Please choose one of the 3 scenarios:"<< endl;
 	cin >> scen_No;
-	cout << "Number of Logical cores " << n_core << endl;
+	cout << "Number of Logical cores" << n_core;
 	cout << "Number of Physical cores " << thread::hardware_concurrency() << endl;
 	cout << "Enter the Number of Cores (1-3):";
 	cin >> num_cores;
@@ -69,18 +69,17 @@ int main () {
 		cout<< "core number is out of range" << endl;
 		exit(EXIT_FAILURE);
 	};
-
-	switch(scen_No){
+	num_threads = (scen_No==1 ? 5 : 3);
+	cout << "num_threads  " << num_threads << endl;
+/*	switch(scen_No){
 	case 1:
 		num_threads = 5;
 		break;
-	case 2:
-		num_threads = 3;
-		break;
+
 	default:
 		num_threads = 3;
 		break;
-	}
+	}*/
 	pthread_attr_t tattr;
 	pthread_t threads[num_threads];
 
@@ -99,8 +98,9 @@ int main () {
 	switch(scen_No){
 	case 1:
 
-		cout << endl << "-----------main()-----------"<< endl << "Scenario(1): 5 thread for 5 function has been created." << endl;
+		cout << endl << "-----------main()-----------"<< endl << "Scenario(1): 5 thread for 5 function IS NEEDED." << endl;
 		while(true){
+			CPU_ZERO(&cpuset);
 			while_counter+=1;
 			try {
 
@@ -146,12 +146,12 @@ int main () {
 			for( i = 0; i < 5; i++ ) {
 				  rc = pthread_join(threads[i], (void**)&resp);
 				  if (rc) {
-					 cout << "Error:unable to join," << rc << endl;
+					 cout << "Error in 1 scenario:unable to join," << rc << endl;
 					 exit(-1);
 				  }
-				  cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
+				  cout << "Which Core " << resp->core_No  <<  "  " << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
 
-			   }
+			};
 			//free(resp);
 			//if(resp) { free(resp); };
 			//sleep(1);
@@ -164,8 +164,10 @@ int main () {
 		break;
 
 	case 2:
-		cout << endl << "-----------main()-----------"<< endl << "Scenario(2): 3 thread for 3 function has been created." << endl;
+		cout << endl << "-----------main()-----------"<< endl << "Scenario(2): 3 thread for 3 function IS NEEDED." << endl;
+		while_counter = 0;
 		while(true){
+			CPU_ZERO(&cpuset);
 			while_counter+=1;
 			thr_data.message="Opening the windows.";
 			try {
@@ -186,7 +188,7 @@ int main () {
 				rc = pthread_condattr_destroy(&cattr);
 				rc= pthread_attr_destroy(&tattr);
 				rc = pthread_join(threads[0], (void**)&resp);
-				cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
+				cout << "Which Core " << resp->core_No <<  "  " << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
 				//TO DO with more core
 			}catch(const char* msg) {
 				 cerr << msg << endl;
@@ -203,34 +205,55 @@ int main () {
 		break;
 
 	case 3:
-		cout << endl << "-----------main()-----------"<< endl << "Scenario(3): 14 thread for 14 function has been created." << endl;
+		cout << endl << "-----------main()-----------"<< endl << "Scenario(3): 14 thread for 14 function IS NEEDED." << endl;
+		while_counter = 0;
 		while(true){
+			CPU_ZERO(&cpuset);
 			while_counter+=1;
 			thr_data.message="Park the car.";
 			try {
 				tp.tv_nsec = 300;
 				CPU_SET(1, &cpuset);
 				thr_data.core_no-- ;
-				param.sched_priority = 1;
-				rc = pthread_attr_setschedparam (&tattr, &param);
-				rc = pthread_attr_setaffinity_np(&tattr, sizeof(cpuset), &cpuset);
-				rc = pthread_create(&threads[0], &tattr, Speedometer, (void *)&thr_data);
-				rc = pthread_create(&threads[1], &tattr, CheckBattery, (void *)&thr_data);
-
 				param.sched_priority = 2;
 				rc = pthread_attr_setschedparam (&tattr, &param);
-				if (num_cores>1) {
+				rc = pthread_attr_setaffinity_np(&tattr, sizeof(cpuset), &cpuset);
+				rc = pthread_create(&threads[0], &tattr, Camera, (void *)&thr_data);
 
+				if (num_cores>1) {
 					CPU_SET(2, &cpuset);
 					thr_data.core_no--;
 					rc = pthread_attr_setaffinity_np(&tattr, sizeof(cpuset), &cpuset);
+				};
+				param.sched_priority = 1;
+				rc = pthread_attr_setschedparam (&tattr, &param);
+				rc = pthread_create(&threads[1], &tattr, Speedometer, (void *)&thr_data);
+
+				param.sched_priority = 3;
+				rc = pthread_attr_setschedparam (&tattr, &param);
+				if (num_cores>2) {
+
+					CPU_SET(3, &cpuset);
+					thr_data.core_no--;
+					rc = pthread_attr_setaffinity_np(&tattr, sizeof(cpuset), &cpuset);
+				};
+
+				rc = pthread_create(&threads[2], &tattr, LockAll, (void *)&thr_data);
+				for( i = 0; i < num_threads; i++ ) {
+					rc = pthread_join(threads[i], (void**)&resp);
+					if (rc) {
+						cout << "Error in main 3 Scenario:unable to join," << rc << endl;
+						exit(-1);
+					};
+					cout << "Which Core " << resp->core_No <<  "  " << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
+
 				};
 
 
 			}catch(const char* msg) {
 				 cerr << msg << endl;
 			};
-			nanosleep(&tp, NULL);
+			//nanosleep(&tp, NULL);
 			tp.tv_nsec += time_increment;
 			cout << "PARK the car is DONE..." << endl;
 			cout << "=================== End of "<< while_counter <<" While Loop========================" << endl;
@@ -246,7 +269,7 @@ int main () {
 		for( i = 0; i < num_threads; i++ ) {
 			rc = pthread_join(threads[i], (void**)&resp);
 			if (rc) {
-				cout << "Error:unable to join," << rc << endl;
+				cout << "Error in main:unable to join," << rc << endl;
 				exit(-1);
 			};
 			cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;

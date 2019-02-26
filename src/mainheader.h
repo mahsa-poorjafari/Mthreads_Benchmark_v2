@@ -26,6 +26,8 @@
 #include <chrono>
 #include "randomint.h"
 #include "randombool.h"
+#include "windowsup.h"
+#include "cameras.h"
 using namespace std;
 
 extern sched_param param;
@@ -45,6 +47,7 @@ struct return_value {
 	char fun_name[32];
 	int val;
 	int thr_id;
+	int core_No;
 };
 extern struct thread_data thr_data;
 extern pthread_mutex_t lock;
