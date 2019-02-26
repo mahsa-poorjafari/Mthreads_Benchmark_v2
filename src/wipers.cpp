@@ -6,10 +6,10 @@
  */
 #include "wipers.h"
 #include "windowscreen.h"
-
+extern int rc;
 //It receives moist_signal form the SenMoistDetector() related to the humidity or wet windows and will turn the wipers On or Off
 void *Wipers(void *data){
-	int rc;
+
 	//void *wiper_status;
 	struct return_value *resp;
 	struct thread_data *my_data = (struct thread_data *) data;
