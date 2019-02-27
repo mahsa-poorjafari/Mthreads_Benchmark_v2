@@ -15,5 +15,7 @@
 #include "wipers.h"
 
 void *WindowScreenClean(void *);
+void *WinScrFront(void *);
+void *WinScrBack(void *);
 
 #endif /* WINDOWSCREEN_H_ */

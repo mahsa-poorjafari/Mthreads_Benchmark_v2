@@ -19,6 +19,7 @@ void *SenMoistDetector(void *data){
 	pthread_t tid = pthread_self();
 	my_data->thread_id = tid;
 	eg->thr_id=tid;
+	eg->core_No = CPU_COUNT(&cpuset);
 	//cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) << endl;
 	a = RandBool();
 	if (a) {
@@ -31,7 +32,7 @@ void *SenMoistDetector(void *data){
 
 	}
 	//cout << endl << "bool RAND " << a << endl;
-	cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) << endl << eg->fun_name << " Thread_ID= " << thr_data.thread_id << " eg-thr-id " <<  eg->thr_id<< endl;
+	cout << eg->fun_name << " Thread_ID= " << thr_data.thread_id << " eg-thr-id " <<  eg->thr_id<< endl;
 	pthread_exit(eg);
 
 };

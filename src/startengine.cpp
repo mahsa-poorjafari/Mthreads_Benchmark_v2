@@ -71,7 +71,7 @@ void *CheckBattery(void *data){
 			eg->val = 4;
 			break;
 		};
-	cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) << "  " << eg->fun_name << " Thread_ID= " << thr_data.thread_id << "  eg-thr-id = " << eg->thr_id << endl;
+	cout << eg->fun_name << " Thread_ID= " << thr_data.thread_id << "  eg-thr-id = " << eg->thr_id << endl;
 	pthread_exit(eg);
 };
 
@@ -89,7 +89,7 @@ void *CheckSeatBelt(void *data){
 	eg->val = RandBool();
 	cout << "bool RAND " << eg->val << endl;
 
-	cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) <<  "  " <<  eg->fun_name << " Thread_ID= " << thr_data.thread_id << "  eg thr id = " << eg->thr_id << endl;
+	cout <<  eg->fun_name << " Thread_ID= " << thr_data.thread_id << "  eg thr id = " << eg->thr_id << endl;
 	pthread_exit(eg);
 
 };
@@ -128,7 +128,7 @@ void *FuelControll(void *data){
 
 		};
 
-	cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) << "  " << eg->fun_name << " Thread_ID= " << thr_data.thread_id << "  eg-thr-id = " << eg->thr_id << endl;
+	cout << eg->fun_name << " Thread_ID= " << thr_data.thread_id << "  eg-thr-id = " << eg->thr_id << endl;
 	pthread_exit(eg);
 };
 

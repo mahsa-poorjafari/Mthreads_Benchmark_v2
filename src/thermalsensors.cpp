@@ -18,6 +18,7 @@ void *SenThermal(void *data){
 	my_data->thread_id = tid;
 	strcpy(eg->fun_name,"SenThermal");
 	eg->thr_id = tid;
+	eg->core_No = CPU_COUNT(&cpuset);
 	t = RandInt(-20,40);
 	cout << "random temporal Int " << t << endl;
 	eg->val = t;

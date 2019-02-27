@@ -98,7 +98,7 @@ int main () {
 	switch(scen_No){
 	case 1:
 
-		cout << endl << "-----------main()-----------"<< endl << "Scenario(1): 5 thread for 5 function IS NEEDED." << endl;
+		cout << endl << "-----------main()-----------"<< endl << "Scenario(1): 8 thread for 8 function IS NEEDED." << endl;
 		while(true){
 			CPU_ZERO(&cpuset);
 			while_counter+=1;
@@ -146,7 +146,7 @@ int main () {
 			for( i = 0; i < 5; i++ ) {
 				  rc = pthread_join(threads[i], (void**)&resp);
 				  if (rc) {
-					 cout << "Error in 1 scenario:unable to join," << rc << endl;
+					 cout << "Error in 1st scenario:unable to join," << rc << endl;
 					 exit(-1);
 				  }
 				  cout << "Which Core " << resp->core_No  <<  "  " << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
@@ -164,7 +164,7 @@ int main () {
 		break;
 
 	case 2:
-		cout << endl << "-----------main()-----------"<< endl << "Scenario(2): 3 thread for 3 function IS NEEDED." << endl;
+		cout << endl << "-----------main()-----------"<< endl << "Scenario(2): 6 thread for 6 function IS NEEDED." << endl;
 		while_counter = 0;
 		while(true){
 			CPU_ZERO(&cpuset);
@@ -182,7 +182,7 @@ int main () {
 				rc = pthread_attr_setschedparam (&tattr, &param);
 				rc = pthread_create(&threads[0], &tattr, CtrWindows, (void *)&thr_data);
 				if (rc) {
-					cout << "Error:unable to create thread for CtrWindows" << rc << endl;
+					cout << "Error in 2nd scenario:unable to join" << rc << endl;
 					exit(-1);
 				}
 				rc = pthread_condattr_destroy(&cattr);
@@ -205,7 +205,7 @@ int main () {
 		break;
 
 	case 3:
-		cout << endl << "-----------main()-----------"<< endl << "Scenario(3): 14 thread for 14 function IS NEEDED." << endl;
+		cout << endl << "-----------main()-----------"<< endl << "Scenario(3): 13 thread for 13 function IS NEEDED." << endl;
 		while_counter = 0;
 		while(true){
 			CPU_ZERO(&cpuset);
@@ -242,7 +242,7 @@ int main () {
 				for( i = 0; i < num_threads; i++ ) {
 					rc = pthread_join(threads[i], (void**)&resp);
 					if (rc) {
-						cout << "Error in main 3 Scenario:unable to join," << rc << endl;
+						cout << "Error in 3rd Scenario:unable to join," << rc << endl;
 						exit(-1);
 					};
 					cout << "Which Core " << resp->core_No <<  "  " << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
@@ -269,7 +269,7 @@ int main () {
 		for( i = 0; i < num_threads; i++ ) {
 			rc = pthread_join(threads[i], (void**)&resp);
 			if (rc) {
-				cout << "Error in main:unable to join," << rc << endl;
+				cout << "Error in main Default:unable to join," << rc << endl;
 				exit(-1);
 			};
 			cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;

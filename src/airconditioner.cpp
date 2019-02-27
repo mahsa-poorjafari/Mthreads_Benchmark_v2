@@ -27,7 +27,7 @@ void *AirConditioner(void *data){
 	pthread_t winthr;
 	rc = pthread_create(&winthr, NULL, SenThermal, (void *)&thr_data);
 	rc = pthread_join(winthr, (void**)&resp);
-	cout << resp->fun_name << "  " << resp->val << endl;
+	cout << resp->fun_name << " Thread_ID= " <<  resp->thr_id << " " << resp->val << endl;
 	// No 1 is code for Turn on the heater
 	// No 2 is code for Turn on the cooler
 	// No 0 is code for do nothing

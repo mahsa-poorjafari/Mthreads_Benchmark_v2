@@ -37,6 +37,7 @@ void *OpenAll(void *arg){
 	my_data->type_name = "which door" ;
 	my_data->message = "Ask to clock all the doors";
 	my_data->signal_name = "lock_all_doors";
+	eg->core_No = CPU_COUNT(&cpuset);
 	eg->val = 13;
 	cout << " 4 thread will create for 4 windows. Thread ID " << eg->thr_id << endl;
 	res = pthread_create(&opwin[0], &oattr, powerwindow_DRV, (void *)&my_data);
@@ -46,9 +47,9 @@ void *OpenAll(void *arg){
 
 	for( i = 0; i < 4; i++ ) {
 		res = pthread_join(opwin[i], (void**)&resp);
-	    cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) <<  "  " << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
+	    cout << "Which Core " << resp->core_No <<  "  " << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
 	    if (res) {
-		   cout << "Error:unable to join," << res << endl;
+		   cout << "Error in OpenAll:unable to join," << res << endl;
 		   exit(-1);
 	    }
 	};
@@ -65,24 +66,18 @@ void *OpenAll(void *arg){
 }
 
 //This is a parent thread = If doors are open, lock the windows,
-void *CheckDoors(void *arg){
-	struct thread_data *my_data = (struct thread_data *) arg;
+void CheckDoors(){
+
 	int d = 0;
 	struct return_value *eg = new struct return_value;
 
 	//pthread_mutex_lock(&lock);
 	pthread_t tid = pthread_self();
-	my_data->thread_id = tid;
 	eg->thr_id = tid;
 	strcpy(eg->fun_name,"CheckDoors");
-
-	my_data->message = "Ask to check the doors";
-	my_data->signal_name = "check_doors";
-	done = 1;
+	eg->core_No = CPU_COUNT(&cpuset);
 
 	d = (int) RandBool();
-	my_data->signal_val= d;
-	my_data->signal_name = "Has the door locked?";
 	eg->val = d;
 	pthread_exit(eg);
 
@@ -95,7 +90,7 @@ void *CtrWindows(void *data){
 	res = pthread_cond_init(&con, &cattr);
 	struct return_value *resp;
 	pthread_attr_t tattr;
-	pthread_t ctrdoors;
+	pthread_t ctrwins;
 	struct thread_data *win_data = (struct thread_data *) data;
 	struct return_value *eg = new struct return_value;
 	cout << "thr_data.core_no= " << win_data->core_no << endl;
@@ -116,42 +111,44 @@ void *CtrWindows(void *data){
 	pthread_t tid = pthread_self();
 	win_data->thread_id = tid;
 	eg->thr_id = tid;
+	eg->core_No = CPU_COUNT(&cpuset);
 
 	strcpy(eg->fun_name,"CtrWindows");
 
-    cout << "CPU_COUNT() " << CPU_COUNT(&cpuset) <<  "  " << "In CtrWindows, Parent Threads ID " << eg->thr_id << endl;
+    cout << "In CtrWindows, Parent Threads ID " << eg->thr_id << endl;
     //pthread_mutex_lock(&lock);
 	switch(n){
 	case 1:
 		cout << "driver side powerwindow" << endl;
-		res = pthread_create(&ctrdoors, &tattr, powerwindow_DRV, (void *)&win_data);
+		res = pthread_create(&ctrwins, &tattr, powerwindow_DRV, (void *)&win_data);
 
 		break;
 	case 2:
 		cout << "front passenger side powerwindow" << endl;
-		res = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_Front, (void *)&win_data);
+		res = pthread_create(&ctrwins, &tattr, powerwindow_PSG_Front, (void *)&win_data);
 
 		break;
 	case 3:
 		cout << "back-left passenger side powerwindow" << endl;
-		res = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_BackL, (void *)&win_data);
+		res = pthread_create(&ctrwins, &tattr, powerwindow_PSG_BackL, (void *)&win_data);
 
 		break;
 	case 4:
 		cout << "back-right passenger side powerwindow" << endl;
-		res = pthread_create(&ctrdoors, &tattr, powerwindow_PSG_BackR, (void *)&win_data);
+		res = pthread_create(&ctrwins, &tattr, powerwindow_PSG_BackR, (void *)&win_data);
 
 		break;
 	case 5:
 	default:
 		cout << "Open All the Windows" << endl;
-		res = pthread_create(&ctrdoors, &tattr, OpenAll, (void *)&win_data);
+		res = pthread_create(&ctrwins, &tattr, OpenAll, (void *)&win_data);
 
 		break;
 	};
-	res=pthread_join(ctrdoors, (void **) &resp);
+	res=pthread_join(ctrwins, (void **) &resp);
+	cout << "Thread ID= " << resp->thr_id <<"  " << resp->fun_name << " Returned= " << resp->val << endl;
     if (res) {
-	   cout << "Error:unable to join," << res << endl;
+	   cout << "Error in CtrWindows:unable to join," << res << endl;
 	   exit(-1);
     }
 	eg->val =  resp->val;
@@ -173,6 +170,7 @@ void *powerwindow_DRV(void *arg){
 	pthread_t tid = pthread_self();
 	my_data->thread_id = tid;
 	eg->thr_id = tid;
+	eg->core_No = CPU_COUNT(&cpuset);
 	strcpy(eg->fun_name,"powerwindow_DRV");
 	eg->val = 1;
     pthread_exit(eg);
@@ -183,6 +181,7 @@ void *powerwindow_PSG_BackL(void *arg){
 	struct return_value *eg = new struct return_value;
 	pthread_t tid = pthread_self();
 	my_data->thread_id = tid;
+	eg->core_No = CPU_COUNT(&cpuset);
 	eg->thr_id = tid;
 	strcpy(eg->fun_name,"powerwindow_PSG_BackL");
 	eg->val = 2;
@@ -194,6 +193,7 @@ void *powerwindow_PSG_BackR(void *arg){
 	struct return_value *eg = new struct return_value;
 	pthread_t tid = pthread_self();
 	my_data->thread_id = tid;
+	eg->core_No = CPU_COUNT(&cpuset);
 	eg->thr_id = tid;
 	strcpy(eg->fun_name,"powerwindow_PSG_BackR");
 	eg->val = 3;
@@ -205,6 +205,7 @@ void *powerwindow_PSG_Front(void *arg){
 	struct return_value *eg = new struct return_value;
 	pthread_t tid = pthread_self();
 	my_data->thread_id = tid;
+	eg->core_No = CPU_COUNT(&cpuset);
 	eg->thr_id = tid;
 	strcpy(eg->fun_name,"powerwindow_PSG_Front");
 	eg->val = 4;
